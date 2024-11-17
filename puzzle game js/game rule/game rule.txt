@@ -1,0 +1,3 @@
+The goal is to arrange the numbers from 1 to 15 in order.
+You can move tiles by clicking them if they're adjacent to the empty space.
+The puzzle is always generated to be solvable.

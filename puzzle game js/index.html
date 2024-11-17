@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .game-container {
+            width: 400px;
+            margin: 20px auto;
+            font-family: Arial, sans-serif;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .tile {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #4a90e2;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        
+        .tile:hover {
+            transform: scale(0.95);
+        }
+        
+        .empty {
+            background: #f0f0f0;
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #357abd;
+        }
+        
+        .moves {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="board" id="board"></div>
+        <div class="controls">
+            <button onclick="newGame()">New Game</button>
+        </div>
+        <div class="moves" id="moves">Moves: 0</div>
+    </div>
+
+    <script>
+        let tiles = [];
+        let emptyPos = 15;
+        let moveCount = 0;
+        
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 16; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                if (i === emptyPos) {
+                    tile.classList.add('empty');
+                } else {
+                    tile.textContent = tiles[i];
+                }
+                tile.addEventListener('click', () => moveTile(i));
+                board.appendChild(tile);
+            }
+        }
+        
+        function isSolvable(arr) {
+            let inversions = 0;
+            for (let i = 0; i < arr.length - 1; i++) {
+                for (let j = i + 1; j < arr.length; j++) {
+                    if (arr[i] && arr[j] && arr[i] > arr[j]) inversions++;
+                }
+            }
+            return inversions % 2 === 0;
+        }
+        
+        function shuffle() {
+            do {
+                tiles = Array.from({length: 15}, (_, i) => i + 1);
+                tiles.push(null);
+                
+                for (let i = tiles.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+                    if (tiles[i] === null) emptyPos = i;
+                    if (tiles[j] === null) emptyPos = j;
+                }
+            } while (!isSolvable(tiles));
+        }
+        
+        function isAdjacent(pos1, pos2) {
+            const row1 = Math.floor(pos1 / 4);
+            const col1 = pos1 % 4;
+            const row2 = Math.floor(pos2 / 4);
+            const col2 = pos2 % 4;
+            
+            return Math.abs(row1 - row2) + Math.abs(col1 - col2) === 1;
+        }
+        
+        function moveTile(pos) {
+            if (isAdjacent(pos, emptyPos)) {
+                tiles[emptyPos] = tiles[pos];
+                tiles[pos] = null;
+                emptyPos = pos;
+                moveCount++;
+                document.getElementById('moves').textContent = `Moves: ${moveCount}`;
+                createBoard();
+                checkWin();
+            }
+        }
+        
+        function checkWin() {
+            for (let i = 0; i < 15; i++) {
+                if (tiles[i] !== i + 1) return;
+            }
+            setTimeout(() => {
+                alert('Congratulations! You solved the puzzle!');
+            }, 100);
+        }
+        
+        function newGame() {
+            moveCount = 0;
+            document.getElementById('moves').textContent = 'Moves: 0';
+            shuffle();
+            createBoard();
+        }
+        
+        // Start the game
+        newGame();
+    </script>
+</body>
+</html>
